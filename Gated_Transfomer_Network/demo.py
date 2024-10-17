@@ -6,7 +6,7 @@
 import torch
 from torch.utils.data.dataloader import DataLoader
 from data_process.create_dataset import Global_Dataset
-from module.transformer import Transformer
+from module.for_MTS.transformer import Transformer
 from torch.optim import Adam
 
 # hyper-parameters setting
@@ -35,7 +35,7 @@ test_dataloader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffl
 # 2. Initialize network
 DEVICE = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print(f'use device:{DEVICE}')
-net = Transformer(d_model=d_model, d_hidden=d_hidden, d_feature=16, d_timestep=128, q=q, v=v, h=h, N=N, class_num=5)
+net = Transformer(d_model=d_model, d_hidden=d_hidden, d_feature=16, d_timestep=128, q=q, v=v, h=h, N=N, class_num=5).to(DEVICE)
 
 # 3. Create opitmizer and loss_function
 optimizer = Adam(net.parameters(), lr=LR)
@@ -45,6 +45,8 @@ loss_function = torch.nn.CrossEntropyLoss()
 for epoch_index in range(EPOCH):
     loss_sum = 0.0
     for x, y in train_dataloader:
+        x = x.to(DEVICE)
+        y = y.to(DEVICE)
         optimizer.zero_grad()
         pre = net(x, 'train')
         loss = loss_function(pre, y)
